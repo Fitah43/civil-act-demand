@@ -62,7 +62,8 @@ function Notification() {
                 idDemande: selectedNotification.id, // Utiliser l'ID de la demande
                 status: decision, // Mettre à jour le statut ("REFUSE" ou "ACCEPTE")
             };
-
+            console.log(headers);
+            
             // Effectuer la requête PUT pour mettre à jour le statut
             const response = await fetch('http://localhost:3005/api/demand/update', {
                 method: 'PUT',

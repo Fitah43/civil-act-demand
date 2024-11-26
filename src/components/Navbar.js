@@ -1,11 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { UserCircleIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import axios from 'axios';
 import CrudAdmin from './CrudAdmin';
-
+import { Badge } from '@mui/material';
 
 function Navbar() {
+  const [notif,setNotif] = useState(0)
+
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        axios.defaults.headers["authorizations"] = `Bearer ${token}`;
+      }
+      const response = await axios.get("http://localhost:3005/api/demand/notificationAdmin");
+      const notifLen = response.data.data
+      setNotif(notifLen.length);      
+    } catch (error) {
+      console.error("Erreur lors de la récupération des notifications:", error);
+    }
+  };
+
+  useEffect(()=>{
+    fetchNotifications()
+  },[])
+
   return (
     <>
       <div className="navbar bg-base-300 flex justify-between px-4">
@@ -14,7 +35,9 @@ function Navbar() {
         </div>
         <div className="navbar-end">
           <Link to="/admin/notifDash" className="btn btn-ghost">
-            <NotificationsIcon fontSize="large" />
+          <Badge badgeContent={notif} color="error" className="!z-10">
+  <NotificationsIcon fontSize="large" />
+</Badge>
           </Link>
         </div>
       </div>

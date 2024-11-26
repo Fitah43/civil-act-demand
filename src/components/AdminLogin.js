@@ -18,12 +18,12 @@ const AdminLogin = () => {
                 password ,
                 role: 'admin'
             });
-            console.log('Token:', response.data.admin_token); // Log du token reçu
+            console.log('Token:', response); // Log du token reçu
             localStorage.setItem('token', response.data.admin_token);
             // Ici, vous pouvez sauvegarder le token dans le localStorage ou le state global
             navigate('/admin/Navbar'); // Redirection vers le tableau de bord admin
         } catch (error) {
-            console.error('Error logging in:', error.response?.data?.message || 'Erreur lors de la connexion');
+            console.error('Error logging in:', error || 'Erreur lors de la connexion');
         }
     };
 

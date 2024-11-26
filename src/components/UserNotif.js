@@ -40,7 +40,8 @@ const UserNotif = () => {
         }
 
         const result = await response.json();
-        console.log(result.demands[0].emailUser);
+        console.log(result.demands.length);
+        console.log(userId)
       
         const notifUniqUser = [...result.demands].filter(demand => demand.emailUser ===userId)
         setDemands(notifUniqUser);

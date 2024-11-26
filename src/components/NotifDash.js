@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { UserCircleIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import Notification from './notification';
+import { Badge } from '@mui/material';
 
 
 function Navbar() {
@@ -14,7 +15,10 @@ function Navbar() {
         </div>
         <div className="navbar-end">
           <Link to="/admin/notifDash" className="btn btn-ghost">
-            <NotificationsIcon fontSize="large" />
+          <Badge badgeContent={0} color="error" className="!z-10">
+              <NotificationsIcon fontSize="large" />
+          </Badge>
+
           </Link>
         </div>
       </div>

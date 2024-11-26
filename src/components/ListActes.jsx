@@ -13,6 +13,8 @@ function ListActes({ status }) {
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [acteToDelete, setActeToDelete] = useState(null);
+    const [scrollPosition,setScrollPosition] = useState(0);
+
 
     // Champs de mise à jour
     const [numActe, setNumActe] = useState('');
@@ -29,6 +31,17 @@ function ListActes({ status }) {
     const [files, setFiles] = useState([]);
     const [test, setTest] = useState([]);
 
+    const handleOpenModal = () => {
+        setScrollPosition(window.scrollY);
+        document.body.style.overflow = 'hidden';
+    }
+
+    const handleCloseModal = () => {
+        // Restaurer la position
+        document.body.style.overflow = 'auto'; // Réactiver le scroll
+        window.scrollTo(0, scrollPosition);
+    };
+
     useEffect(() => {
         fetchActes();
     }, []);
@@ -40,9 +53,15 @@ function ListActes({ status }) {
                 axios.defaults.headers['authorizations'] = `Bearer ${token}`;
             }
             const response = await axios.get('http://localhost:3005/api/act/lists');
+           
             setActes(response.data.act);
+        //    if(response.data && response.data.act){
+        //    }else{
+        //     setActes([]);
+        //    }
         } catch (error) {
             console.error('Erreur lors du chargement des actes', error);
+            setActes([]);
         }
     };
 
@@ -163,7 +182,8 @@ function ListActes({ status }) {
                         </tr>
                     </thead>
                     <tbody>
-                        {actes.map((acte) => (
+                        {/* {Array.isArray(actes) && actes.length > 0 ? ( */}
+                       { actes.map((acte) => (
                             <tr key={acte.numAct}>
                                 <td>{acte.numAct}</td>
                                 <td>{acte.typeActe}</td>
@@ -186,7 +206,14 @@ function ListActes({ status }) {
                                     </button>
                                 </td>
                             </tr>
-                        ))}
+                        ))
+                    // )
+                    //  : (
+                    //     <tr>
+                    //         <td colSpan="7">ghdhdfg</td>
+                    //     </tr>
+                    // )
+                    }
                     </tbody>
                 </table>
             </div>

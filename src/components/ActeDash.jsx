@@ -8,7 +8,8 @@ import CreateActe from './CreateActe';
 function Navbar() {
   return (
     <>
-      <div className="navbar bg-base-300 flex justify-between px-4">
+      {/* <div className="navbar bg-base-300 flex justify-between px-4"> */}
+      <div className="navbar bg-base-300 flex justify-between px-4 fixed top-0 w-full z-40">
         <div className="navbar-start">
           <h1 className="text-xl font-bold">Gestion des Actes</h1>
         </div>

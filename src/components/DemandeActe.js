@@ -69,7 +69,7 @@ const DemandForm = () => {
     });
 
     data.append('emailUser', emailUser);
-    data.append('emailAdmin', 'mikaelJos@gmail.com');
+    data.append('emailAdmin', 'oreo@gmail.com');
     Array.from(files).forEach((file) => {
       data.append('files', file);
     });

@@ -25,6 +25,10 @@ function Navbar() {
 
   useEffect(()=>{
     fetchNotifications()
+    const interval = setInterval(()=>{      
+      fetchNotifications()
+    },1000)
+    return ()=> clearInterval(interval)
   },[])
 
   return (

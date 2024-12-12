@@ -46,47 +46,75 @@ function Notification() {
 
   const handleDecision = async (decision) => {
     try {
-        if (selectedNotification) {
-            const token = localStorage.getItem("token");
-            // Créer un objet headers
-            const headers = {
-                'Content-Type': 'application/json',
-            };
+      if (selectedNotification) {
+        const token = localStorage.getItem("token");
 
-            // Si un token est présent, l'ajouter à l'en-tête Authorization
-            if (token) {
-                headers["authorizations"] = `Bearer ${token}`;
-            }
+        const headers = {
+          "Content-Type": "application/json",
+          authorizations: token ? `Bearer ${token}` : undefined,
+        };
 
-            const data = {
-                idDemande: selectedNotification.id, // Utiliser l'ID de la demande
-                status: decision, // Mettre à jour le statut ("REFUSE" ou "ACCEPTE")
-            };
-            console.log(headers);
-            
-            // Effectuer la requête PUT pour mettre à jour le statut
-            const response = await fetch('http://localhost:3005/api/demand/update', {
-                method: 'PUT',
-                headers: headers,
-                body: JSON.stringify(data), // Passer les données avec le statut mis à jour
-            });
+        const data = {
+          idDemande: selectedNotification.id,
+          status: decision, // "ACCEPTE" ou "REFUSE"
+        };
 
-            if (!response.ok) {
-                throw new Error('La mise à jour a échoué');
-            }
+        const response = await fetch("http://localhost:3005/api/demand/update", {
+          method: "PUT",
+          headers,
+          body: JSON.stringify(data),
+        });
 
-            const result = await response.json();
-            // Gérer la réponse du serveur ici
-            console.log(result);
-            fetchNotifications(); // Rafraîchir les notifications après l'action
+        if (!response.ok) {
+          throw new Error("La mise à jour du statut a échoué.");
         }
-    } catch (err) {
-        console.error(err);
-    } finally {
-        handleCloseModal(); // Fermer le modal après la mise à jour
-    }
-};
 
+        const result = await response.json();
+        console.log("Mise à jour réussie:", result);
+        fetchNotifications(); // Rafraîchir les notifications après la mise à jour
+      }
+    } catch (err) {
+      console.error("Erreur lors de la mise à jour:", err);
+    } finally {
+      handleCloseModal(); // Fermer le modal après la mise à jour
+    }
+  };
+
+  const handleSendPaid = async () => {
+    try {
+      if (selectedNotification) {
+        const token = localStorage.getItem("token");
+
+        const headers = {
+          "Content-Type": "application/json",
+          authorizations: token ? `Bearer ${token}` : undefined,
+        };
+
+        const data = {
+          idDemande: selectedNotification.id,
+          paid: selectedNotification.paid, // Mettre à jour paid à true
+        };
+
+        const response = await fetch("http://localhost:3005/api/demand/update", {
+          method: "PUT",
+          headers,
+          body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+          throw new Error("La mise à jour du statut payé a échoué.");
+        }
+
+        const result = await response.json();
+        console.log("Mise à jour réussie:", result);
+        fetchNotifications(); // Rafraîchir les notifications après la mise à jour
+      }
+    } catch (err) {
+      console.error("Erreur lors de la mise à jour:", err);
+    } finally {
+      handleCloseModal(); // Fermer le modal après la mise à jour
+    }
+  };
 
   return (
     <>
@@ -145,12 +173,20 @@ function Notification() {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => handleDecision("REFUSE")} color="error">
-              Refuser
-            </Button>
-            <Button onClick={() => handleDecision("ACCEPTE")} color="primary">
-              Approuver
-            </Button>
+            {selectedNotification && selectedNotification.attachment.length >= 3 ? (
+              <Button onClick={handleSendPaid} color="primary">
+                Envoyer
+              </Button>
+            ) : (
+              <>
+                <Button onClick={() => handleDecision("REFUSE")} color="error">
+                  Refuser
+                </Button>
+                <Button onClick={() => handleDecision("ACCEPTE")} color="primary">
+                  Approuver
+                </Button>
+              </>
+            )}
             <Button onClick={handleCloseModal} color="secondary">
               Fermer
             </Button>

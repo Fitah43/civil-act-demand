@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 import { jwtDecode } from 'jwt-decode';
-import { 
-  TextField, Button, Typography, Select, MenuItem, 
-  FormControl, InputLabel, Grid, Box, AppBar, Toolbar, Link 
-} from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import { useNavigate } from 'react-router-dom';  // Import useNavigate for navigation
+import { useNavigate } from 'react-router-dom';  
+import {Badge} from '@mui/material';
 
+const MySwal = withReactContent(Swal);
 
 
 const DemandForm = () => {
@@ -25,8 +26,32 @@ const DemandForm = () => {
   const [message, setMessage] = useState('');
   const [emailUser, setEmailUser] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const [notif,setNotif] = useState(0)
   const navigate = useNavigate();  // Declare navigate to use for page redirection
+
+
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        axios.defaults.headers["authorizations"] = `Bearer ${token}`;
+      }
+      const response = await axios.get("http://localhost:3005/api/demand/notificationUser");
+      const notifLen = response.data.demands
+      console.log(notifLen);  // Display the number of notifications in console for testing purposes. For production, you should handle this in your app.  // Display the number of notifications in your app.  // Display the number of notifications in your app.  // Display the number of notifications in your app.  // Display the number of notifications in your app.  // Display the number of notifications in your app.  // Display the number of notifications in your app.  //
+      setNotif(notifLen.length);      
+    } catch (error) {
+      console.error("Erreur lors de la récupération des notifications:", error);
+    }
+  };
+
+  useEffect(()=>{
+    fetchNotifications()
+    const interval = setInterval(()=>{      
+      fetchNotifications()
+    },1000)
+    return ()=> clearInterval(interval)
+  },[])
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -86,7 +111,8 @@ const DemandForm = () => {
 
       const result = await response.json();
       if (response.ok) {
-        setMessage('Demande envoyée avec succès.');
+        MySwal.fire('envoyée !', 'La demande a été envoyée avec succès.', 'success');
+        // setMessage('Demande envoyée avec succès.');
       } else {
         setMessage(result.message || 'Une erreur est survenue lors de la soumission.');
       }
@@ -95,37 +121,11 @@ const DemandForm = () => {
     } finally {
       setLoading(false);
     }
+    
   };
 
   return (
     <div className="w-full min-h-screen bg-gray-100 flex flex-col">
-    {/* Navbar */}
-    {/* <div className="navbar bg-primary text-white px-4">
-      <div className="flex-1">
-        <a className="btn btn-ghost normal-case text-xl">Demande d'Acte d'Etat Civil</a>
-      </div>
-      <div className="flex-none">
-        <button
-          className="btn btn-ghost"
-          onClick={() => navigate('/userNotif')} // Navigate to the userNotif page
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            className="w-6 h-6 mr-2 stroke-current"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .415-.162.816-.445 1.114L4 17h5m6 0a3 3 0 01-6 0m6 0H9"
-            />
-          </svg>
-          Notifications
-        </button>
-      </div>
-    </div> */}
   
      <div className="navbar bg-base-300 flex justify-between px-4">
         <div className="navbar-start">
@@ -138,7 +138,9 @@ const DemandForm = () => {
           <button
           onClick={() => navigate('/userNotif')}
           >
+          <Badge badgeContent={notif} color="error" className="!z-10">
             <NotificationsIcon fontSize="large" />
+          </Badge>
           </button>
           
         </div>
@@ -309,7 +311,7 @@ const DemandForm = () => {
         </div>
       </form>
       
-      {message && <p className="text-center text-secondary mt-4">{message}</p>}
+      {/* {message && <p className="text-center text-secondary mt-4">{message}</p>} */}
     </div>
   </div>
     );

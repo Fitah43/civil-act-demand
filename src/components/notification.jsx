@@ -14,6 +14,7 @@ import {
 
 function Notification() {
   const [notifications, setNotifications] = useState([]);
+  const [emptyMsg, setEmptyMsg] = useState("");
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [openModal, setOpenModal] = useState(false);
 
@@ -27,8 +28,12 @@ function Notification() {
       if (token) {
         axios.defaults.headers["authorizations"] = `Bearer ${token}`;
       }
-      const response = await axios.get("http://localhost:3005/api/demand/notificationAdmin");
-      setNotifications(response.data.data);
+      const response = await axios.get(
+        "http://localhost:3005/api/demand/notificationAdmin"
+      );
+      const dataNotif = response.data.data;
+      if (!dataNotif) setEmptyMsg("Accune demande en ce moment");
+      else setNotifications(response.data.data);
     } catch (error) {
       console.error("Erreur lors de la récupération des notifications:", error);
     }
@@ -59,11 +64,14 @@ function Notification() {
           status: decision, // "ACCEPTE" ou "REFUSE"
         };
 
-        const response = await fetch("http://localhost:3005/api/demand/update", {
-          method: "PUT",
-          headers,
-          body: JSON.stringify(data),
-        });
+        const response = await fetch(
+          "http://localhost:3005/api/demand/update",
+          {
+            method: "PUT",
+            headers,
+            body: JSON.stringify(data),
+          }
+        );
 
         if (!response.ok) {
           throw new Error("La mise à jour du statut a échoué.");
@@ -92,14 +100,17 @@ function Notification() {
 
         const data = {
           idDemande: selectedNotification.id,
-          paid: selectedNotification.paid, // Mettre à jour paid à true
+          paid: "YES", // Mettre à jour paid à true
         };
 
-        const response = await fetch("http://localhost:3005/api/demand/update", {
-          method: "PUT",
-          headers,
-          body: JSON.stringify(data),
-        });
+        const response = await fetch(
+          "http://localhost:3005/api/demand/update",
+          {
+            method: "PUT",
+            headers,
+            body: JSON.stringify(data),
+          }
+        );
 
         if (!response.ok) {
           throw new Error("La mise à jour du statut payé a échoué.");
@@ -121,38 +132,42 @@ function Notification() {
       <div style={{ marginTop: "40px", marginLeft: "40px" }}>
         <h1>Voici les demandes non traitées :</h1>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-          {notifications.map((notif) => (
-            <Card
-              key={notif.id}
-              onClick={() => handleOpenModal(notif)}
-              style={{
-                cursor: "pointer",
-                width: "300px",
-                border: "1px solid #ddd",
-                boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-              }}
-            >
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Nouvelle Demande d'Acte
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {`Utilisateur : ${notif.emailUser}`}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {`Type d'acte : ${notif.actDemand}`}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {`Numéro d'acte : ${notif.numActe}`}
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <Button size="small" color="primary">
-                  Voir Détails
-                </Button>
-              </CardActions>
-            </Card>
-          ))}
+          {emptyMsg ? (
+            <h2>{emptyMsg}</h2>
+          ) : (
+            notifications.map((notif) => (
+              <Card
+                key={notif.id}
+                onClick={() => handleOpenModal(notif)}
+                style={{
+                  cursor: "pointer",
+                  width: "300px",
+                  border: "1px solid #ddd",
+                  boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Nouvelle Demande d'Acte
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {`Utilisateur : ${notif.emailUser}`}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {`Type d'acte : ${notif.actDemand}`}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {`Numéro d'acte : ${notif.numActe}`}
+                  </Typography>
+                </CardContent>
+                <CardActions>
+                  <Button size="small" color="primary">
+                    Voir Détails
+                  </Button>
+                </CardActions>
+              </Card>
+            ))
+          )}
         </div>
 
         {/* Modal pour afficher les détails */}
@@ -173,7 +188,8 @@ function Notification() {
             )}
           </DialogContent>
           <DialogActions>
-            {selectedNotification && selectedNotification.attachment.length >= 3 ? (
+            {selectedNotification &&
+            selectedNotification.attachment.length >= 3 ? (
               <Button onClick={handleSendPaid} color="primary">
                 Envoyer
               </Button>
@@ -182,7 +198,10 @@ function Notification() {
                 <Button onClick={() => handleDecision("REFUSE")} color="error">
                   Refuser
                 </Button>
-                <Button onClick={() => handleDecision("ACCEPTE")} color="primary">
+                <Button
+                  onClick={() => handleDecision("ACCEPTE")}
+                  color="primary"
+                >
                   Approuver
                 </Button>
               </>

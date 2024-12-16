@@ -35,18 +35,18 @@ const DemandForm = () => {
         axios.defaults.headers["authorizations"] = `Bearer ${token}`;
       }
       const response = await axios.get(
-        "http://localhost:3005/api/demand/notificationUser"
+        `http://localhost:3005/api/demand/notificationUser?emailUser=${emailUser}`,
       );
       const notifLen = response.data.demands;
-      if (notifLen) setNotif(notifLen.length);
+      if (notifLen) {
+        const data = notifLen.filter(notif => notif.status==='ACCEPTE')
+        setNotif(data.length);
+      }
     } catch (error) {
       console.error("Erreur lors de la récupération des notifications:", error);
     }
   };
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -55,6 +55,14 @@ const DemandForm = () => {
       setEmailUser(decodedToken.user_id || "");
     }
   }, []);
+
+  // Appel de fetchNotifications seulement après la mise à jour de emailUser
+  useEffect(() => {
+    if (emailUser) {
+      fetchNotifications();
+    }
+  }, [emailUser]); // Déclenche fetchNotifications dès que emailUser est mis à jour
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -105,7 +113,7 @@ const DemandForm = () => {
     });
 
     data.append("emailUser", emailUser);
-    data.append("emailAdmin", "mika@gmail.com");
+    data.append("emailAdmin", "oreo@gmail.com");
     Array.from(files).forEach((file) => {
       data.append("files", file);
     });

@@ -56,7 +56,7 @@ function Notification() {
 
         const headers = {
           "Content-Type": "application/json",
-          authorizations: token ? `Bearer ${token}` : undefined,
+          authorizations: `Bearer ${token}`,
         };
 
         const data = {
@@ -72,14 +72,14 @@ function Notification() {
             body: JSON.stringify(data),
           }
         );
-
+        const res = await response.json();
         if (!response.ok) {
           throw new Error("La mise à jour du statut a échoué.");
         }
-
-        const result = await response.json();
-        console.log("Mise à jour réussie:", result);
+        
+        console.log("Mise à jour réussie:", res); // Utilisez `res` ici
         fetchNotifications(); // Rafraîchir les notifications après la mise à jour
+        // Rafraîchir les notifications après la mise à jour
       }
     } catch (err) {
       console.error("Erreur lors de la mise à jour:", err);

@@ -29,53 +29,45 @@ const UserNotif = () => {
   const [selectedDemand, setSelectedDemand] = useState(null);
   const [file, setFile] = useState(null);
   const navigate = useNavigate();
-  const [empty, setEmpty] = useState("");
 
-  const fetchDemands = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error(
-          "Utilisateur non authentifié. Veuillez vous connecter."
-        );
-      }
-
-      const decodedToken = jwtDecode(token);
-      const userId = decodedToken.user_id;
-
-      const response = await fetch(
-        "http://localhost:3005/api/demand/notificationUser",
-        {
-          headers: {
-            authorizations: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(
-          result.message || "Erreur lors de la récupération des demandes."
-        );
-      }
-
-      const result = await response.json();
-      if (!result.demands) {
-        setEmpty("vous n'avez pas encore fait une demande");
-      } else {
-        const notifUniqUser = result.demands.filter(
-          (demand) => demand.emailUser === userId
-        );
-        setEmpty("");
-        setSelectedDemand(notifUniqUser);
-      }
-    } catch (err) {
-      setError(err.message || "Erreur réseau");
-    } finally {
-      setLoading(false);
-    }
-  };
   useEffect(() => {
+    const fetchDemands = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error(
+            "Utilisateur non authentifié. Veuillez vous connecter."
+          );
+        }
+
+        const decodedToken = jwtDecode(token);
+        const userId = decodedToken.user_id;
+
+        const response = await fetch(
+          `http://localhost:3005/api/demand/notificationUser?emailUser=${userId}`,
+          {
+            headers: {
+              authorizations: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          const result = await response.json();
+          throw new Error(
+            result.message || "Erreur lors de la récupération des demandes."
+          );
+        }
+
+        const result = await response.json();
+        if (result.demands) setDemands(result.demands);
+      } catch (err) {
+        setError(err.message || "Erreur réseau");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchDemands();
   }, []);
 
@@ -158,14 +150,16 @@ const UserNotif = () => {
         <Typography color="error" align="center">
           {error}
         </Typography>
-      ) : demands.length === 0 || empty ? (
-        <h2 style={{ textAlign: "center" }}>{empty}</h2>
+      ) : demands.length === 0 ? (
+        <Typography align="center" style={{ fontSize: "2em" }}>
+          Aucune demande n'a été effectué.{" "}
+        </Typography>
       ) : (
         <List>
           {demands.map((demand) => (
             <ListItem
               key={demand.id}
-              sx={{ borderBottom: "1px solid #fff", cursor: "pointer" }}
+              sx={{ borderBottom: "1px solid #ddd", cursor: "pointer" }}
               onClick={() =>
                 demand.status === "ACCEPTE" && handleOpenModal(demand)
               }

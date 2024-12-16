@@ -18,7 +18,7 @@ function Navbar() {
       }
       const response = await axios.get("http://localhost:3005/api/demand/notificationAdmin");
       const notifLen = response.data.data
-      setNotif(notifLen.length);      
+if (notifLen) setNotif(notifLen.length);      
     } catch (error) {
       console.error("Erreur lors de la récupération des notifications:", error);
     }
@@ -26,10 +26,6 @@ function Navbar() {
 
   useEffect(()=>{
     fetchNotifications()
-    const interval = setInterval(()=>{      
-      fetchNotifications()
-    },1000)
-    return ()=> clearInterval(interval)
   },[])
 
   return (

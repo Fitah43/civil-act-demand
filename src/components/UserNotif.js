@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import {jwtDecode} from 'jwt-decode';
+import React, { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
 import {
   Typography,
   List,
@@ -14,18 +14,17 @@ import {
   DialogActions,
   Button,
   TextField,
-} from '@mui/material';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
-import withReactContent from 'sweetalert2-react-content';
+} from "@mui/material";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);
-
 
 const UserNotif = () => {
   const [demands, setDemands] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const [selectedDemand, setSelectedDemand] = useState(null);
   const [file, setFile] = useState(null);
@@ -34,32 +33,36 @@ const UserNotif = () => {
   useEffect(() => {
     const fetchDemands = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token) {
-          throw new Error('Utilisateur non authentifié. Veuillez vous connecter.');
+          throw new Error(
+            "Utilisateur non authentifié. Veuillez vous connecter."
+          );
         }
 
         const decodedToken = jwtDecode(token);
         const userId = decodedToken.user_id;
 
-        const response = await fetch('http://localhost:3005/api/demand/notificationUser', {
-          headers: {
-            authorizations: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `http://localhost:3005/api/demand/notificationUser?emailUser=${userId}`,
+          {
+            headers: {
+              authorizations: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           const result = await response.json();
-          throw new Error(result.message || 'Erreur lors de la récupération des demandes.');
+          throw new Error(
+            result.message || "Erreur lors de la récupération des demandes."
+          );
         }
-        
-        
+
         const result = await response.json();
-        const notifUniqUser = result.demands.filter((demand) => demand.emailUser === userId);
-        // console.log(notifUniqUser.attachment.length);
-        setDemands(notifUniqUser);
+        if (result.demands) setDemands(result.demands);
       } catch (err) {
-        setError(err.message || 'Erreur réseau');
+        setError(err.message || "Erreur réseau");
       } finally {
         setLoading(false);
       }
@@ -87,28 +90,33 @@ const UserNotif = () => {
     if (!file || !selectedDemand) return;
 
     const formData = new FormData();
-    formData.append('idDemande', selectedDemand.id); // ID de la demande
+    formData.append("idDemande", selectedDemand.id); // ID de la demande
     // formData.append('status', selectedDemand.status); // Gardez le statut inchangé
-    formData.append('files', file); // Nouveau fichier
+    formData.append("files", file); // Nouveau fichier
 
     try {
-      const response = await fetch('http://localhost:3005/api/demand/update', {
-        method: 'PUT',
+      const response = await fetch("http://localhost:3005/api/demand/update", {
+        method: "PUT",
         headers: {
-          authorizations: `Bearer ${localStorage.getItem('token')}`,
+          authorizations: `Bearer ${localStorage.getItem("token")}`,
         },
         body: formData,
       });
-      
 
       if (!response.ok) {
         const result = await response.json();
-        throw new Error(result.message || 'Erreur lors de la mise à jour de la demande.');
+        throw new Error(
+          result.message || "Erreur lors de la mise à jour de la demande."
+        );
       }
 
       // alert('Fichier envoyé avec succès.');
       handleCloseModal();
-      MySwal.fire('envoyée !', 'Le capture de payement a été envoyée avec succès.', 'success');
+      MySwal.fire(
+        "envoyée !",
+        "Le capture de payement a été envoyée avec succès.",
+        "success"
+      );
     } catch (err) {
       alert(err.message);
     }
@@ -120,13 +128,13 @@ const UserNotif = () => {
         <div className="navbar-start">
           <a
             className="btn btn-ghost normal-case text-xl font-bold"
-            onClick={() => navigate('/demande-acte')}
+            onClick={() => navigate("/demande-acte")}
           >
             Demande d'Acte d'État Civil
           </a>
         </div>
         <div className="navbar-end">
-          <IconButton onClick={() => navigate('/userNotif')}>
+          <IconButton onClick={() => navigate("/userNotif")}>
             <NotificationsIcon fontSize="large" />
           </IconButton>
         </div>
@@ -137,20 +145,24 @@ const UserNotif = () => {
       </Typography>
 
       {loading ? (
-        <CircularProgress sx={{ display: 'block', mx: 'auto', mt: 3 }} />
+        <CircularProgress sx={{ display: "block", mx: "auto", mt: 3 }} />
       ) : error ? (
         <Typography color="error" align="center">
           {error}
         </Typography>
       ) : demands.length === 0 ? (
-        <Typography align="center">Aucune demande trouvée.</Typography>
+        <Typography align="center" style={{ fontSize: "2em" }}>
+          Aucune demande n'a été effectué.{" "}
+        </Typography>
       ) : (
         <List>
           {demands.map((demand) => (
             <ListItem
               key={demand.id}
-              sx={{ borderBottom: '1px solid #ddd', cursor: 'pointer' }}
-              onClick={() => demand.status === 'ACCEPTE' && handleOpenModal(demand)}
+              sx={{ borderBottom: "1px solid #ddd", cursor: "pointer" }}
+              onClick={() =>
+                demand.status === "ACCEPTE" && handleOpenModal(demand)
+              }
             >
               <ListItemText
                 primary={`Demande ID: ${demand.id}`}
@@ -176,7 +188,11 @@ const UserNotif = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseModal}>Annuler</Button>
-          <Button onClick={handleSubmitUpdate} variant="contained" color="primary">
+          <Button
+            onClick={handleSubmitUpdate}
+            variant="contained"
+            color="primary"
+          >
             Envoyer
           </Button>
         </DialogActions>
